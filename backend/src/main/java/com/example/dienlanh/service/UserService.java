@@ -38,6 +38,8 @@ public class UserService {
                 .phone(user.getPhone())
                 .role(user.getRole() != null ? user.getRole().name() : null)
                 .status(user.getStatus() != null ? user.getStatus().name() : null)
+                .lastLoginTime(user.getLastLoginTime())
+                .lastLoginIp(user.getLastLoginIp())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

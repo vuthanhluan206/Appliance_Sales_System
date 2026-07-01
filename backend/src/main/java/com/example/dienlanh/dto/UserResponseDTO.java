@@ -19,6 +19,8 @@ public class UserResponseDTO {
     private String address;
     private String role; // CUSTOMER, TECHNICIAN, ADMIN
     private String status; // ACTIVE, INACTIVE, BANNED
+    private LocalDateTime lastLoginTime;
+    private String lastLoginIp;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

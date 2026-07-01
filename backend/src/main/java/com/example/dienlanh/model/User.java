@@ -46,6 +46,12 @@ public class User {
     @Column(name = "last_login_token")
     private String lastLoginToken;
 
+    @Column(name = "last_login_time")
+    private LocalDateTime lastLoginTime;
+
+    @Column(name = "last_login_ip")
+    private String lastLoginIp;
+
     @Column(nullable = false)
     @Pattern(regexp = "^0[3|5|7|8|9][0-9]{8}$", message = "Số điện thoại không hợp lệ (Phải là 10 số và đúng đầu số Việt Nam)")
     private String phone;

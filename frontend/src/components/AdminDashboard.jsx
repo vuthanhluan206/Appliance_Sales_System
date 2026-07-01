@@ -1392,6 +1392,7 @@ export default function AdminDashboard() {
                       <th>Địa chỉ</th>
                       <th>Vai trò</th>
                       <th>Trạng thái</th>
+                      <th>Đăng nhập cuối</th>
                       <th style={{ textAlign:'center' }}>Thao tác</th>
                     </tr>
                   </thead>
@@ -1411,6 +1412,20 @@ export default function AdminDashboard() {
                           <span className={`badge ${u.status === 'ACTIVE' ? 'badge-green' : 'badge-red'}`} style={{ opacity: 0.9 }}>
                             {u.status === 'ACTIVE' ? 'Hoạt động' : 'Tạm khóa'}
                           </span>
+                        </td>
+                        <td>
+                          {u.lastLoginTime ? (
+                            <div style={{ fontSize: '0.76rem', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ fontWeight: 600 }}>
+                                {new Date(u.lastLoginTime).toLocaleTimeString('vi-VN')} {new Date(u.lastLoginTime).toLocaleDateString('vi-VN')}
+                              </span>
+                              <span style={{ color: 'var(--brand-blue)', fontSize: '0.7rem' }}>
+                                IP: {u.lastLoginIp === '0:0:0:0:0:0:0:1' ? '127.0.0.1' : (u.lastLoginIp || '—')}
+                              </span>
+                            </div>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>Chưa đăng nhập</span>
+                          )}
                         </td>
                         <td>
                           <div className="flex-center" style={{ gap: 8 }}>

@@ -179,6 +179,13 @@ export default function ProfilePage({ currentUser, orders: initialOrders = [], o
               <>
                 <InfoRow icon={<Phone size={15} />} label="Điện thoại" value={currentUser?.phone || 'Chưa cập nhật'} />
                 <InfoRow icon={<MapPin size={15} />} label="Địa chỉ" value={currentUser?.address || 'Chưa cập nhật'} />
+                {currentUser?.lastLoginTime && (
+                  <InfoRow 
+                    icon={<Clock size={15} />} 
+                    label="Đăng nhập cuối" 
+                    value={`${new Date(currentUser.lastLoginTime).toLocaleTimeString('vi-VN')} ${new Date(currentUser.lastLoginTime).toLocaleDateString('vi-VN')} (${currentUser.lastLoginIp === '0:0:0:0:0:0:0:1' ? '127.0.0.1' : (currentUser.lastLoginIp || '—')})`} 
+                  />
+                )}
               </>
             )}
           </div>

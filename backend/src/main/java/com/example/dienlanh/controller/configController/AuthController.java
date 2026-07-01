@@ -53,12 +53,16 @@ public class AuthController {
         // Generate a new lastLoginToken on new login to invalidate old sessions
         String lastLoginToken = java.util.UUID.randomUUID().toString();
         user.setLastLoginToken(lastLoginToken);
-        userRepository.save(user);
 
         // Record successful login history
         String ipAddress = getClientIp(httpRequest);
         String userAgent = httpRequest.getHeader("User-Agent");
         loginHistoryService.recordLogin(user, ipAddress, userAgent);
+
+        // Save last login details directly to User entity
+        user.setLastLoginTime(java.time.LocalDateTime.now());
+        user.setLastLoginIp(ipAddress);
+        userRepository.save(user);
 
         JwtService.TokenResponse tokens = jwtService.createTokens(username, user.getRole().name(), lastLoginToken);
 
