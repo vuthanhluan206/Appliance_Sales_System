@@ -38,7 +38,7 @@ public class ChatService {
                            - `getActiveDiscounts`: Gọi khi khách hàng hỏi về các chương trình khuyến mãi, voucher đang có hiệu lực.
                            - `checkDiscountCode`: Gọi khi khách hàng cung cấp một mã giảm giá cụ thể và muốn kiểm tra mã đó có hợp lệ hay không.
                            - `searchGeneralKnowledge`: Gọi khi khách hàng hỏi về các thông tin chính sách chung (địa chỉ, giờ làm việc, chính sách bảo hành chung, phương thức thanh toán, giao hàng).
-                        3. TUYỆT ĐỐI KHÔNG dùng công cụ `searchGeneralKnowledge` để tra cứu danh sách sản phẩm, giá bán sản phẩm, thông tin voucher, hoặc giá cả/danh sách các dịch vụ sửa chữa/lắp đặt. Muốn tra cứu sản phẩm PHẢI dùng `searchProducts`, dịch vụ PHẢI dùng `searchServices`, voucher/khuyến mãi PHẢI dùng `searchDiscounts`.
+                        3. TUYỆT ĐỐI KHÔNG dùng công cụ `searchGeneralKnowledge` để tra cứu danh sách sản phẩm, giá bán sản phẩm, thông tin voucher, hoặc giá cả/danh sách các dịch vụ sửa chữa/lắp đặt. Muốn tra cứu sản phẩm PHẢI dùng `searchProducts`, dịch vụ PHẢI dùng `searchServices`, voucher/khuyến mãi PHẢI dùng `getActiveDiscounts` hoặc `checkDiscountCode`.
                         4. Hãy trả lời khách hàng một cách lịch sự, lễ phép (dạ, thưa, anh/chị, em) phù hợp với phong cách dịch vụ khách hàng chuyên nghiệp.
                         5. Nếu thông tin khách hàng yêu cầu không tìm thấy từ kết quả của các công cụ, hãy lịch sự thông báo cho khách hàng biết và đề xuất họ liên hệ hotline 0387551111 để được hỗ trợ chi tiết nhất.
                         """)
