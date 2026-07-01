@@ -264,7 +264,12 @@ Hãy gọi ngay hotline nếu bạn cần sửa chữa hoặc lắp đặt gấp
         }
       ]);
     } catch (error) {
-      console.log('Backend chat API failed or pgvector unavailable. Running local Q&A fallback...', error);
+      console.warn(
+        '⚠️ CẢNH BÁO AI CHAT: Không kết nối được API AI Backend hoặc cơ sở dữ liệu Vector Store. ' +
+        'Hệ thống tự động kích hoạt chế độ dự phòng Q&A nội bộ (Local Fallback). ' +
+        'Hãy kiểm tra xem Backend (cổng 8080) có chạy thành công không và đã cấu hình GEMINI_API_KEY chưa.',
+        error
+      );
       
       // Fallback to Local Knowledge Base
       setTimeout(() => {
