@@ -8,7 +8,6 @@ import com.example.dienlanh.service.DocumentService;
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class DocumentController {
 
     private final DocumentService documentService;

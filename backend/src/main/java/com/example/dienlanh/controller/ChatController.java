@@ -9,7 +9,6 @@ import com.example.dienlanh.service.ChatService;
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ChatController {
 
     private final ChatService chatService;
