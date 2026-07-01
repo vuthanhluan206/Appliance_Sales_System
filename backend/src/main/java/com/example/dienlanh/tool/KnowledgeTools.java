@@ -20,7 +20,7 @@ public class KnowledgeTools {
 
     private final VectorStore vectorStore;
 
-    @Tool(description = "Tra cứu cơ sở dữ liệu chính sách, bảo hành, giờ làm việc, địa chỉ liên hệ, quy trình sửa chữa hoặc các câu hỏi thường gặp của Điện Lạnh Đông Triều 24H.")
+    @Tool(description = "Tra cứu cơ sở dữ liệu chính sách chung, địa chỉ cửa hàng, giờ làm việc, phương thức thanh toán, chính sách vận chuyển, chính sách bảo hành chung của Điện Lạnh Đông Triều 24H. KHÔNG ĐƯỢC dùng công cụ này để tra cứu danh sách sản phẩm, giá bán sản phẩm, thông tin voucher, hoặc giá cả/danh sách các dịch vụ sửa chữa/lắp đặt.")
     public List<String> searchGeneralKnowledge(
         @ToolParam(description = "Câu hỏi hoặc từ khóa cần tìm kiếm về chính sách, địa điểm, liên hệ hoặc bảo hành (ví dụ: Địa chỉ cửa hàng ở đâu, Chính sách bảo hành bao lâu, thời gian làm việc...)") String query
     ) {
