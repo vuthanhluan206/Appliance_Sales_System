@@ -11,10 +11,40 @@ const ORDER_STATUS_CONFIG = {
 
 export default function ProfilePage({ currentUser, orders: initialOrders = [], onUserUpdated }) {
   const [orders, setOrders] = useState(initialOrders);
+  const [loginHistory, setLoginHistory] = useState([]);
 
   useEffect(() => {
     setOrders(initialOrders);
   }, [initialOrders]);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      const fetchLoginHistory = async () => {
+        try {
+          const res = await api.getLoginHistory();
+          setLoginHistory(res.data || []);
+        } catch (err) {
+          console.error('Error fetching login history:', err);
+        }
+      };
+      fetchLoginHistory();
+    }
+  }, [currentUser]);
+
+  const parseUserAgent = (ua) => {
+    if (!ua) return 'Thiết bị không xác định';
+    const lower = ua.toLowerCase();
+    if (lower.includes('mobi') || lower.includes('android') || lower.includes('iphone') || lower.includes('ipad')) {
+      if (lower.includes('iphone')) return '📱 iPhone (iOS)';
+      if (lower.includes('ipad')) return '📱 iPad (iOS)';
+      if (lower.includes('android')) return '📱 Thiết bị Android';
+      return '📱 Thiết bị di động';
+    }
+    if (lower.includes('windows')) return '💻 Máy tính Windows';
+    if (lower.includes('macintosh') || lower.includes('mac os')) return '💻 Mac OS';
+    if (lower.includes('linux')) return '💻 Máy tính Linux';
+    return '🖥 Thiết bị khác';
+  };
 
   useEffect(() => {
     if (currentUser?.id && currentUser?.role === 'CUSTOMER') {
@@ -207,6 +237,54 @@ export default function ProfilePage({ currentUser, orders: initialOrders = [], o
                 <ShieldCheck size={15} /> Cập nhật mật khẩu
               </button>
             </form>
+          )}
+        </div>
+
+        {/* Lịch sử đăng nhập */}
+        <div className="card-flat" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <Clock size={16} color="var(--brand-blue)" />
+            <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>Lịch Sử Đăng Nhập</span>
+          </div>
+          
+          {loginHistory.length === 0 ? (
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', padding: '10px 0' }}>
+              Chưa có dữ liệu lịch sử đăng nhập.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 220, overflowY: 'auto', paddingRight: 4 }}>
+              {loginHistory.map(log => (
+                <div key={log.id} style={{
+                  padding: '10px 12px',
+                  background: 'var(--bg-surface-2)',
+                  borderRadius: 'var(--r-md)',
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  border: '1px solid var(--border)'
+                }}>
+                  <div className="flex-between">
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {parseUserAgent(log.userAgent)}
+                    </span>
+                    <span style={{ 
+                      color: 'var(--brand-blue)', 
+                      fontWeight: 700,
+                      background: 'rgba(0, 82, 204, 0.06)',
+                      padding: '1px 6px',
+                      borderRadius: 4,
+                      fontSize: '0.72rem'
+                    }}>
+                      {log.ipAddress}
+                    </span>
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.74rem' }}>
+                    Đăng nhập lúc: <strong>{new Date(log.loginTime).toLocaleTimeString('vi-VN')} {new Date(log.loginTime).toLocaleDateString('vi-VN')}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

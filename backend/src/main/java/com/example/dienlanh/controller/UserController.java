@@ -13,10 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dienlanh.dto.UserResponseDTO;
+import com.example.dienlanh.dto.LoginHistoryResponseDTO;
 import com.example.dienlanh.dto.request.UserCreateDTO;
 import com.example.dienlanh.dto.request.UserUpdateDTO;
 import com.example.dienlanh.helper.json.ApiResponse;
 import com.example.dienlanh.service.UserService;
+import com.example.dienlanh.service.LoginHistoryService;
+import com.example.dienlanh.repository.UserRepository;
+import com.example.dienlanh.helper.exception.ResourceNotFoundException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final LoginHistoryService loginHistoryService;
 
     // create User
     @PostMapping("/createUser")
@@ -60,5 +66,19 @@ public class UserController {
     public String deleteUser(@PathVariable Long id) {
         this.userService.deleteUser(id);
         return "delete User seccessfull";
+    }
+
+    // Get current user's login history
+    @GetMapping("/api/user/login-history")
+    public ResponseEntity<ApiResponse<List<LoginHistoryResponseDTO>>> getMyLoginHistory(
+            org.springframework.security.core.Authentication authentication) {
+        if (authentication == null) {
+            return ApiResponse.error(org.springframework.http.HttpStatus.UNAUTHORIZED, "Chưa đăng nhập.");
+        }
+        String email = authentication.getName();
+        com.example.dienlanh.model.User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        List<LoginHistoryResponseDTO> history = loginHistoryService.getLoginHistory(user);
+        return ApiResponse.success(history, "Lấy lịch sử đăng nhập thành công.");
     }
 }

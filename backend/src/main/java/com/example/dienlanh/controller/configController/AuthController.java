@@ -11,6 +11,7 @@ import com.example.dienlanh.repository.UserRepository;
 import com.example.dienlanh.service.JwtService;
 import com.example.dienlanh.service.RefreshTokenService;
 import com.example.dienlanh.service.UserService;
+import com.example.dienlanh.service.LoginHistoryService;
 import com.example.dienlanh.dto.request.UserCreateDTO;
 import com.example.dienlanh.dto.UserResponseDTO;
 import com.example.dienlanh.dto.VerifyOtpDTO;
@@ -31,9 +32,10 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final com.example.dienlanh.service.EmailService emailService;
+    private final LoginHistoryService loginHistoryService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request, jakarta.servlet.http.HttpServletRequest httpRequest) {
         String username = request.get("username");
         String password = request.get("password");
 
@@ -53,6 +55,11 @@ public class AuthController {
         user.setLastLoginToken(lastLoginToken);
         userRepository.save(user);
 
+        // Record successful login history
+        String ipAddress = getClientIp(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
+        loginHistoryService.recordLogin(user, ipAddress, userAgent);
+
         JwtService.TokenResponse tokens = jwtService.createTokens(username, user.getRole().name(), lastLoginToken);
 
         UserResponseDTO userDTO = userService.convertToDTO(user);
@@ -63,6 +70,14 @@ public class AuthController {
                 "user", userDTO);
 
         return ApiResponse.success(responseData, "Đăng nhập thành công.");
+    }
+
+    private String getClientIp(jakarta.servlet.http.HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null || xfHeader.isEmpty()) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0].trim();
     }
 
     @PostMapping("/refresh-token")
