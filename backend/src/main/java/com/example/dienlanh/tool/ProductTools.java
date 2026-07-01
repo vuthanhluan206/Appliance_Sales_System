@@ -34,8 +34,8 @@ public class ProductTools {
     @Tool(description = "Tìm kiếm thông tin các sản phẩm điện lạnh trong cửa hàng theo từ khóa tên/mô tả và/hoặc tên danh mục. Trả về danh sách sản phẩm khớp yêu cầu.")
     @Transactional(readOnly = true)
     public List<ProductDto> searchProducts(
-        @org.springframework.lang.Nullable @ToolParam(description = "Từ khóa tìm kiếm theo tên sản phẩm hoặc mô tả sản phẩm (ví dụ: Panasonic, inverter, 12000 BTU...)") String keyword,
-        @org.springframework.lang.Nullable @ToolParam(description = "Tên danh mục sản phẩm cần lọc (ví dụ: Điều hòa, Máy giặt, Tủ lạnh...)") String category
+        @org.jspecify.annotations.Nullable @ToolParam(description = "Từ khóa tìm kiếm theo tên sản phẩm hoặc mô tả sản phẩm (ví dụ: Panasonic, inverter, 12000 BTU...)") String keyword,
+        @org.jspecify.annotations.Nullable @ToolParam(description = "Tên danh mục sản phẩm cần lọc (ví dụ: Điều hòa, Máy giặt, Tủ lạnh...)") String category
     ) {
         log.info("Tool searchProducts called with keyword='{}', category='{}'", keyword, category);
         List<Product> products = productRepository.findAll();

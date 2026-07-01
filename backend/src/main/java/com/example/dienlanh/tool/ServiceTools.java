@@ -34,7 +34,7 @@ public class ServiceTools {
     @Tool(description = "Tìm kiếm thông tin các dịch vụ kỹ thuật điện lạnh (lắp đặt, vệ sinh, bảo trì, sửa chữa điều hòa, máy giặt, tủ lạnh...) theo từ khóa.")
     @Transactional(readOnly = true)
     public List<ServiceDto> searchServices(
-        @org.springframework.lang.Nullable @ToolParam(description = "Từ khóa tìm kiếm theo tên dịch vụ hoặc mô tả dịch vụ (ví dụ: vệ sinh máy lạnh, sửa tủ lạnh, lắp máy giặt...)") String keyword
+        @org.jspecify.annotations.Nullable @ToolParam(description = "Từ khóa tìm kiếm theo tên dịch vụ hoặc mô tả dịch vụ (ví dụ: vệ sinh máy lạnh, sửa tủ lạnh, lắp máy giặt...)") String keyword
     ) {
         log.info("Tool searchServices called with keyword='{}'", keyword);
         List<Service> services = serviceRepository.findAll();
