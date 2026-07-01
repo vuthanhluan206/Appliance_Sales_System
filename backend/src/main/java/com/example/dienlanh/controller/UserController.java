@@ -81,4 +81,14 @@ public class UserController {
         List<LoginHistoryResponseDTO> history = loginHistoryService.getLoginHistory(user);
         return ApiResponse.success(history, "Lấy lịch sử đăng nhập thành công.");
     }
+
+    // Get specific user's login history (Admin only)
+    @GetMapping("/api/admin/user/{userId}/login-history")
+    public ResponseEntity<ApiResponse<List<LoginHistoryResponseDTO>>> getUserLoginHistory(
+            @PathVariable Long userId) {
+        com.example.dienlanh.model.User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        List<LoginHistoryResponseDTO> history = loginHistoryService.getLoginHistory(user);
+        return ApiResponse.success(history, "Lấy lịch sử đăng nhập của người dùng thành công.");
+    }
 }

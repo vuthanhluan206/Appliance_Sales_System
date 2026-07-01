@@ -154,6 +154,7 @@ export const getUser = (id) => api.get(`/getUser/${id}`).then(res => res.data);
 export const updateUser = (id, data) => api.put(`/updateUser/${id}`, data).then(res => res.data);
 export const deleteUser = (id) => api.delete(`/deleteUser/${id}`).then(res => res.data);
 export const getLoginHistory = () => api.get('/api/user/login-history').then(res => res.data);
+export const getUserLoginHistory = (userId) => api.get(`/api/admin/user/${userId}/login-history`).then(res => res.data);
 
 // Category API
 export const getCategories = () => api.get('/categories').then(res => res.data);

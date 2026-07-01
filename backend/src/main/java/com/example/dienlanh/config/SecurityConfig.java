@@ -81,6 +81,9 @@ public class SecurityConfig {
                         // refresh-token...)
                         .requestMatchers(permitAllUrls).permitAll()
 
+                        // Bảo vệ các API quản trị viên
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+
                         // Các request còn lại đều bắt buộc phải đăng nhập (có token hợp lệ)
                         // Quyền hạn chi tiết đối với từng API sẽ được khai báo bằng @PreAuthorize ở
                         // Controller

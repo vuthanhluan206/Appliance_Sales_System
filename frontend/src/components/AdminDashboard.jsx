@@ -89,6 +89,10 @@ export default function AdminDashboard() {
   const [showEditVoucher, setShowEditVoucher] = useState(false);
   const [showAddUser,     setShowAddUser]     = useState(false);
   const [showEditUser,    setShowEditUser]    = useState(false);
+  const [showLoginHistoryModal, setShowLoginHistoryModal] = useState(false);
+  const [historyUser,     setHistoryUser]     = useState(null);
+  const [selectedUserHistory, setSelectedUserHistory] = useState([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   /* ── CRUD form states ─── */
   const [newProduct,  setNewProduct]  = useState({ name:'', description:'', price:'', categoryId:'', brand:'', warrantyMonths:12, images:[] });
@@ -725,6 +729,36 @@ export default function AdminDashboard() {
       status: user.status || 'ACTIVE'
     });
     setShowEditUser(true);
+  };
+
+  const handleViewLoginHistory = async (user) => {
+    setHistoryUser(user);
+    setSelectedUserHistory([]);
+    setIsLoadingHistory(true);
+    setShowLoginHistoryModal(true);
+    try {
+      const res = await api.getUserLoginHistory(user.id);
+      setSelectedUserHistory(res.data || []);
+    } catch (err) {
+      notify('Lỗi khi tải lịch sử đăng nhập', 'error');
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const parseUserAgent = (ua) => {
+    if (!ua) return 'Thiết bị không xác định';
+    const lower = ua.toLowerCase();
+    if (lower.includes('mobi') || lower.includes('android') || lower.includes('iphone') || lower.includes('ipad')) {
+      if (lower.includes('iphone')) return '📱 iPhone (iOS)';
+      if (lower.includes('ipad')) return '📱 iPad (iOS)';
+      if (lower.includes('android')) return '📱 Thiết bị Android';
+      return '📱 Thiết bị di động';
+    }
+    if (lower.includes('windows')) return '💻 Máy tính Windows';
+    if (lower.includes('macintosh') || lower.includes('mac os')) return '💻 Mac OS';
+    if (lower.includes('linux')) return '💻 Máy tính Linux';
+    return '🖥 Thiết bị khác';
   };
 
   const handleUpdateUserSubmit = async (e) => {
@@ -1431,6 +1465,9 @@ export default function AdminDashboard() {
                           <div className="flex-center" style={{ gap: 8 }}>
                             <button onClick={() => handleOpenEditUser(u)} className="btn-icon" style={{ color: 'var(--brand-blue)' }} title="Phân quyền tài khoản">
                               <Shield size={14} />
+                            </button>
+                            <button onClick={() => handleViewLoginHistory(u)} className="btn-icon" style={{ color: 'var(--purple)' }} title="Lịch sử đăng nhập">
+                              <Calendar size={14} />
                             </button>
                             {u.email !== 'admin@gmail.com' && (
                               <button onClick={()=>handleDeleteUser(u.id)} className="btn-icon" style={{ color:'var(--danger)' }} title="Xóa tài khoản"><Trash2 size={14}/></button>
@@ -2151,6 +2188,68 @@ export default function AdminDashboard() {
           </div>
           <div className="form-field"><label>Ghi chú công việc</label><textarea rows={3} placeholder="Chi tiết yêu cầu kỹ thuật..." value={assignNotes} onChange={e=>setAssignNotes(e.target.value)} style={{ resize:'none' }}/></div>
         </CrudModal>
+      )}
+
+      {/* Login History Modal */}
+      {showLoginHistoryModal && historyUser && (
+        <div className="modal-overlay" style={{ zIndex: 3000 }} onClick={()=>{setShowLoginHistoryModal(false);setHistoryUser(null);}}>
+          <div className="modal-box" style={{ width: 500, maxWidth: '95vw' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📋 Lịch Sử Đăng Nhập: {historyUser.name}</h3>
+              <button onClick={()=>{setShowLoginHistoryModal(false);setHistoryUser(null);}} className="btn-icon"><X size={18} /></button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 20px' }}>
+              {isLoadingHistory ? (
+                <div className="flex-center" style={{ padding: '20px 0', gap: 8 }}>
+                  <Loader className="animate-spin" size={20} /> Đang tải lịch sử đăng nhập...
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 320, overflowY: 'auto', paddingRight: 4 }}>
+                  {selectedUserHistory.length === 0 ? (
+                    <div style={{ fontSize: '0.86rem', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>
+                      Không tìm thấy lịch sử đăng nhập nào của tài khoản này.
+                    </div>
+                  ) : (
+                    selectedUserHistory.map(log => (
+                      <div key={log.id} style={{
+                        padding: '10px 12px',
+                        background: 'var(--bg-surface-2)',
+                        borderRadius: 'var(--r-md)',
+                        fontSize: '0.8rem',
+                        border: '1px solid var(--border)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 4
+                      }}>
+                        <div className="flex-between">
+                          <strong style={{ color: 'var(--text-primary)' }}>
+                            {parseUserAgent(log.userAgent)}
+                          </strong>
+                          <span style={{ 
+                            color: 'var(--brand-blue)', 
+                            fontWeight: 700,
+                            background: 'rgba(0, 82, 204, 0.06)',
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            fontSize: '0.72rem'
+                          }}>
+                            {log.ipAddress}
+                          </span>
+                        </div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.74rem' }}>
+                          Thời gian: <strong>{new Date(log.loginTime).toLocaleTimeString('vi-VN')} {new Date(log.loginTime).toLocaleDateString('vi-VN')}</strong>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="modal-footer" style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={()=>{setShowLoginHistoryModal(false);setHistoryUser(null);}} className="btn btn-secondary">Đóng</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Add User Modal */}
