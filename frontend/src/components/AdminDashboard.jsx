@@ -86,6 +86,7 @@ export default function AdminDashboard() {
   const [showAddService,  setShowAddService]  = useState(false);
   const [showEditService, setShowEditService] = useState(false);
   const [showAddVoucher,  setShowAddVoucher]  = useState(false);
+  const [showEditVoucher, setShowEditVoucher] = useState(false);
   const [showAddUser,     setShowAddUser]     = useState(false);
   const [showEditUser,    setShowEditUser]    = useState(false);
 
@@ -107,6 +108,19 @@ export default function AdminDashboard() {
     scope: 'ALL',
     scopeCategoryId: '',
     scopeProductIds: []
+  });
+  const [editingVoucher, setEditingVoucher] = useState(null);
+  const [editVoucherForm, setEditVoucherForm] = useState({
+    code: '',
+    discountType: 'PERCENTAGE',
+    discountValue: '',
+    minOrderValue: '',
+    maxUsage: 100,
+    expiryDate: '',
+    scope: 'ALL',
+    scopeCategoryId: '',
+    scopeProductIds: [],
+    status: 'ACTIVE'
   });
   const [newUser,     setNewUser]     = useState({ name:'', email:'', phone:'', password:'', address:'', role:'TECHNICIAN', status:'ACTIVE' });
   const [editingUser, setEditingUser] = useState(null);
@@ -520,6 +534,30 @@ export default function AdminDashboard() {
   const handleCreateVoucher = async (e) => {
     e.preventDefault();
     try {
+      // Input range validation
+      if (newVoucher.discountType === 'PERCENTAGE') {
+        const val = parseFloat(newVoucher.discountValue);
+        if (isNaN(val) || val <= 0 || val > 100) {
+          notify('Phần trăm giảm giá phải nằm trong khoảng từ 0% đến 100%!', 'error');
+          return;
+        }
+      } else {
+        const val = parseFloat(newVoucher.discountValue);
+        if (isNaN(val) || val <= 0) {
+          notify('Số tiền giảm giá phải lớn hơn 0!', 'error');
+          return;
+        }
+      }
+
+      if (newVoucher.minOrderValue && parseFloat(newVoucher.minOrderValue) < 0) {
+        notify('Giá trị đơn hàng tối thiểu không được âm!', 'error');
+        return;
+      }
+      if (newVoucher.maxUsage && parseInt(newVoucher.maxUsage) <= 0) {
+        notify('Giới hạn sử dụng phải ít nhất là 1!', 'error');
+        return;
+      }
+
       const nowStr = new Date().toISOString().split('.')[0];
       const expiryStr = newVoucher.expiryDate
         ? `${newVoucher.expiryDate}T23:59:59`
@@ -559,6 +597,109 @@ export default function AdminDashboard() {
       setShowAddVoucher(false); notify('Đã tạo mã giảm giá!'); fetchAllData();
     } catch (err) {
       notify(api.extractErrorMessage(err, 'Lỗi khi tạo voucher'), 'error');
+    }
+  };
+
+  const handleOpenEditVoucher = (v) => {
+    setEditingVoucher(v);
+    
+    let scope = 'ALL';
+    let scopeCategoryId = '';
+    let scopeProductIds = [];
+    
+    if (v.applicableConditions) {
+      if (v.applicableConditions.startsWith('CATEGORY:')) {
+        scope = 'CATEGORY';
+        scopeCategoryId = v.applicableConditions.split(':')[1];
+      } else if (v.applicableConditions.startsWith('PRODUCT:')) {
+        scope = 'PRODUCT';
+        const parts = v.applicableConditions.split(':')[1];
+        scopeProductIds = parts ? parts.split(',').map(idStr => {
+          const num = parseInt(idStr);
+          return isNaN(num) ? idStr : num;
+        }) : [];
+      }
+    }
+    
+    let expiryDate = '';
+    if (v.endDate) {
+      expiryDate = v.endDate.split('T')[0];
+    }
+
+    setEditVoucherForm({
+      code: v.code || '',
+      discountType: v.discountType === 'FIXED_AMOUNT' ? 'FIXED' : 'PERCENTAGE',
+      discountValue: v.discountValue || '',
+      minOrderValue: v.minOrderValue || '',
+      maxUsage: v.maxUsages || 100,
+      expiryDate: expiryDate,
+      scope: scope,
+      scopeCategoryId: scopeCategoryId,
+      scopeProductIds: scopeProductIds,
+      status: v.status || 'ACTIVE'
+    });
+    setShowEditVoucher(true);
+  };
+
+  const handleUpdateVoucherSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingVoucher) return;
+    try {
+      // Input range validation
+      if (editVoucherForm.discountType === 'PERCENTAGE') {
+        const val = parseFloat(editVoucherForm.discountValue);
+        if (isNaN(val) || val <= 0 || val > 100) {
+          notify('Phần trăm giảm giá phải nằm trong khoảng từ 0% đến 100%!', 'error');
+          return;
+        }
+      } else {
+        const val = parseFloat(editVoucherForm.discountValue);
+        if (isNaN(val) || val <= 0) {
+          notify('Số tiền giảm giá phải lớn hơn 0!', 'error');
+          return;
+        }
+      }
+
+      if (editVoucherForm.minOrderValue && parseFloat(editVoucherForm.minOrderValue) < 0) {
+        notify('Giá trị đơn hàng tối thiểu không được âm!', 'error');
+        return;
+      }
+      if (editVoucherForm.maxUsage && parseInt(editVoucherForm.maxUsage) <= 0) {
+        notify('Giới hạn sử dụng phải ít nhất là 1!', 'error');
+        return;
+      }
+
+      const expiryStr = editVoucherForm.expiryDate
+        ? `${editVoucherForm.expiryDate}T23:59:59`
+        : `${new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]}T23:59:59`;
+
+      let appCond = 'ALL';
+      if (editVoucherForm.scope === 'CATEGORY') {
+        if (!editVoucherForm.scopeCategoryId) { notify('Vui lòng chọn danh mục áp dụng!', 'error'); return; }
+        appCond = `CATEGORY:${editVoucherForm.scopeCategoryId}`;
+      } else if (editVoucherForm.scope === 'PRODUCT') {
+        if (!editVoucherForm.scopeProductIds || editVoucherForm.scopeProductIds.length === 0) { notify('Vui lòng chọn ít nhất 1 sản phẩm áp dụng!', 'error'); return; }
+        appCond = `PRODUCT:${editVoucherForm.scopeProductIds.join(',')}`;
+      }
+
+      await api.updateDiscount(editingVoucher.id, {
+        code: editVoucherForm.code.trim().toUpperCase(),
+        discountType: editVoucherForm.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
+        discountValue: parseFloat(editVoucherForm.discountValue),
+        minOrderValue: parseFloat(editVoucherForm.minOrderValue || 0),
+        maxUsages: parseInt(editVoucherForm.maxUsage || 100),
+        startDate: editingVoucher.startDate || new Date().toISOString().split('.')[0],
+        endDate: expiryStr,
+        applicableConditions: appCond,
+        status: editVoucherForm.status || 'ACTIVE'
+      });
+
+      setShowEditVoucher(false);
+      setEditingVoucher(null);
+      notify('Cập nhật voucher thành công!');
+      fetchAllData();
+    } catch (err) {
+      notify(api.extractErrorMessage(err, 'Lỗi khi cập nhật voucher'), 'error');
     }
   };
 
@@ -1135,30 +1276,90 @@ export default function AdminDashboard() {
               <button onClick={()=>setShowAddVoucher(true)} className="btn btn-primary" style={{ gap:6 }}><Plus size={15}/>Tạo Voucher Mới</button>
             </div>
             <div className="vouchers-grid">
-              {discounts.map(d=>(
-                <div key={d.id} className="card" style={{ padding:18 }}>
-                  <div className="flex-between" style={{ marginBottom:10 }}>
-                    <span style={{ fontWeight:800, fontSize:'1.1rem', color:'var(--brand-blue)', letterSpacing:'.05em' }}>{d.code}</span>
-                    <button onClick={()=>handleDeleteDiscount(d.id)} className="btn-icon" style={{ color:'var(--danger)' }}><Trash2 size={14}/></button>
+              {discounts.map(d=>{
+                const isExpired = d.endDate ? new Date(d.endDate) < new Date() : false;
+                const displayStatus = isExpired ? 'EXPIRED' : (d.status || 'ACTIVE');
+                
+                // Status badge config
+                let badgeBg = 'rgba(0, 135, 90, 0.08)';
+                let badgeColor = 'var(--success)';
+                let badgeLabel = 'Hoạt động';
+                if (displayStatus === 'DEACTIVATED') {
+                  badgeBg = 'rgba(222, 53, 11, 0.08)';
+                  badgeColor = 'var(--danger)';
+                  badgeLabel = 'Tạm khóa';
+                } else if (displayStatus === 'EXPIRED') {
+                  badgeBg = 'rgba(122, 134, 154, 0.1)';
+                  badgeColor = 'var(--text-secondary)';
+                  badgeLabel = 'Hết hạn';
+                }
+
+                // Progress percentage
+                const used = d.usedCount || 0;
+                const total = d.maxUsages || 1;
+                const usagePercent = Math.min(100, (used / total) * 100);
+
+                return (
+                  <div key={d.id} className="card" style={{ 
+                    padding:18, 
+                    borderLeft: d.discountType === 'PERCENTAGE' ? '4px solid var(--brand-blue)' : '4px solid var(--purple)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: 200
+                  }}>
+                    <div>
+                      <div className="flex-between" style={{ marginBottom:10 }}>
+                        <span style={{ fontWeight:800, fontSize:'1.1rem', color:'var(--brand-blue)', letterSpacing:'.05em' }}>{d.code}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ 
+                            background: badgeBg, 
+                            color: badgeColor, 
+                            padding: '2px 8px', 
+                            borderRadius: '4px', 
+                            fontSize: '0.7rem', 
+                            fontWeight: 700 
+                          }}>{badgeLabel}</span>
+                          <button onClick={()=>handleOpenEditVoucher(d)} className="btn-icon" style={{ color:'var(--text-secondary)' }} title="Chỉnh sửa"><Edit size={14}/></button>
+                          <button onClick={()=>handleDeleteDiscount(d.id)} className="btn-icon" style={{ color:'var(--danger)' }} title="Xóa"><Trash2 size={14}/></button>
+                        </div>
+                      </div>
+                      <div style={{ fontSize:'1.4rem', fontWeight:800, color:'var(--danger)', marginBottom:6 }}>
+                        {d.discountType==='PERCENTAGE' ? `${d.discountValue}% OFF` : fmtFull(d.discountValue)}
+                      </div>
+                      <div style={{ fontSize:'0.78rem', color:'var(--text-muted)', display:'flex', flexDirection:'column', gap:3 }}>
+                        {d.minOrderValue>0 && <span>Đơn tối thiểu: <strong>{fmtVnd(d.minOrderValue)}</strong></span>}
+                        {d.endDate && <span>HSD: <strong>{new Date(d.endDate).toLocaleDateString('vi-VN')}</strong></span>}
+                        {d.applicableConditions && d.applicableConditions !== 'ALL' && (
+                          <span style={{ color: 'var(--brand-blue)', fontWeight: 600 }}>
+                            Áp dụng: {d.applicableConditions.startsWith('CATEGORY:') 
+                              ? `Danh mục: ${categories.find(c => String(c.id) === String(d.applicableConditions.split(':')[1]))?.name || '—'}`
+                              : `Sản phẩm cụ thể (${d.applicableConditions.split(':')[1].split(',').length} SP)`
+                            }
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px dashed var(--border)' }}>
+                      <div className="flex-between" style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: 4 }}>
+                        <span>Lượt dùng:</span>
+                        <strong>{used} / {total} ({Math.round(usagePercent)}%)</strong>
+                      </div>
+                      <div style={{ height: 5, background: 'var(--border)', borderRadius: 2.5, overflow: 'hidden' }}>
+                        <div style={{ 
+                          width: `${usagePercent}%`, 
+                          height: '100%', 
+                          background: usagePercent >= 100 ? 'var(--danger)' : 'var(--brand-blue)', 
+                          borderRadius: 2.5 
+                        }} />
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize:'1.4rem', fontWeight:800, color:'var(--danger)', marginBottom:6 }}>
-                    {d.discountType==='PERCENTAGE' ? `${d.discountValue}% OFF` : fmtFull(d.discountValue)}
-                  </div>
-                  <div style={{ fontSize:'0.78rem', color:'var(--text-muted)', display:'flex', flexDirection:'column', gap:3 }}>
-                    {d.minOrderValue>0 && <span>Đơn tối thiểu: <strong>{fmtVnd(d.minOrderValue)}</strong></span>}
-                    {d.maxUsages && <span>Giới hạn: <strong>{d.maxUsages} lượt</strong></span>}
-                    {d.endDate && <span>HSD: <strong>{new Date(d.endDate).toLocaleDateString('vi-VN')}</strong></span>}
-                    {d.applicableConditions && d.applicableConditions !== 'ALL' && (
-                      <span style={{ color: 'var(--brand-blue)', fontWeight: 600 }}>
-                        Áp dụng: {d.applicableConditions.startsWith('CATEGORY:') 
-                          ? `Danh mục: ${categories.find(c => String(c.id) === String(d.applicableConditions.split(':')[1]))?.name || '—'}`
-                          : `Sản phẩm cụ thể (${d.applicableConditions.split(':')[1].split(',').length} SP)`
-                        }
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {discounts.length===0 && (
                 <div className="card-flat" style={{ padding:32, gridColumn:'1/-1' }}>
                   <div className="empty-state"><Tag size={48}/><p style={{ marginTop:10, fontWeight:700 }}>Chưa có voucher nào</p></div>
@@ -1794,6 +1995,112 @@ export default function AdminDashboard() {
                             ? currentIds.filter(id => id !== p.id) 
                             : [...currentIds, p.id];
                           setNewVoucher({ ...newVoucher, scopeProductIds: nextIds });
+                        }}
+                      />
+                      <span>{p.name} ({fmtVnd(p.price)})</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CrudModal>
+      )}
+
+      {/* Edit Voucher Modal */}
+      {showEditVoucher && editingVoucher && (
+        <CrudModal title="🎟 Chỉnh Sửa Voucher" onClose={()=>{setShowEditVoucher(false);setEditingVoucher(null);}} onSubmit={handleUpdateVoucherSubmit}>
+          <div className="form-row form-row-2">
+            <div className="form-field"><label>Mã voucher *</label><input type="text" required placeholder="VD: SUMMER25" style={{ textTransform:'uppercase', fontWeight:700, letterSpacing:'.05em' }} value={editVoucherForm.code} onChange={e=>setEditVoucherForm({...editVoucherForm,code:e.target.value.toUpperCase()})}/></div>
+            <div className="form-field"><label>Loại giảm giá</label>
+              <select value={editVoucherForm.discountType} onChange={e=>setEditVoucherForm({...editVoucherForm,discountType:e.target.value})}>
+                <option value="PERCENTAGE">Phần trăm (%)</option>
+                <option value="FIXED">Số tiền cố định (VNĐ)</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-row form-row-2">
+            <div className="form-field"><label>{editVoucherForm.discountType==='PERCENTAGE'?'Phần trăm giảm (%) *':'Số tiền giảm (VNĐ) *'}</label><input type="number" required placeholder="0" value={editVoucherForm.discountValue} onChange={e=>setEditVoucherForm({...editVoucherForm,discountValue:e.target.value})}/></div>
+            <div className="form-field"><label>Đơn hàng tối thiểu (VNĐ)</label><input type="number" placeholder="0" value={editVoucherForm.minOrderValue} onChange={e=>setEditVoucherForm({...editVoucherForm,minOrderValue:e.target.value})}/></div>
+          </div>
+          <div className="form-row form-row-2">
+            <div className="form-field"><label>Giới hạn sử dụng</label><input type="number" placeholder="100" value={editVoucherForm.maxUsage} onChange={e=>setEditVoucherForm({...editVoucherForm,maxUsage:e.target.value})}/></div>
+            <div className="form-field"><label>Ngày hết hạn *</label><input type="date" required value={editVoucherForm.expiryDate} onChange={e=>setEditVoucherForm({...editVoucherForm,expiryDate:e.target.value})}/></div>
+          </div>
+          
+          <div className="form-row form-row-2" style={{ marginTop: 12 }}>
+            <div className="form-field">
+              <label>Phạm vi áp dụng sản phẩm</label>
+              <select 
+                value={editVoucherForm.scope || 'ALL'} 
+                onChange={e => setEditVoucherForm({
+                  ...editVoucherForm, 
+                  scope: e.target.value,
+                  scopeCategoryId: '',
+                  scopeProductIds: []
+                })}
+              >
+                <option value="ALL">Tất cả sản phẩm</option>
+                <option value="CATEGORY">Theo danh mục sản phẩm</option>
+                <option value="PRODUCT">Theo sản phẩm cụ thể</option>
+              </select>
+            </div>
+            <div className="form-field">
+              <label>Trạng thái hoạt động</label>
+              <select 
+                value={editVoucherForm.status || 'ACTIVE'} 
+                onChange={e => setEditVoucherForm({ ...editVoucherForm, status: e.target.value })}
+              >
+                <option value="ACTIVE">Hoạt động</option>
+                <option value="DEACTIVATED">Tạm khóa</option>
+              </select>
+            </div>
+          </div>
+
+          {editVoucherForm.scope === 'CATEGORY' && (
+            <div className="form-field" style={{ marginTop: 12 }}>
+              <label>Chọn danh mục sản phẩm áp dụng *</label>
+              <select 
+                required 
+                value={editVoucherForm.scopeCategoryId || ''} 
+                onChange={e => setEditVoucherForm({ ...editVoucherForm, scopeCategoryId: e.target.value })}
+              >
+                <option value="">-- Chọn danh mục --</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {editVoucherForm.scope === 'PRODUCT' && (
+            <div className="form-field" style={{ marginTop: 12 }}>
+              <label>Chọn sản phẩm áp dụng * (Chọn ít nhất 1)</label>
+              <div style={{ 
+                maxHeight: 180, 
+                overflowY: 'auto', 
+                border: '1px solid var(--border)', 
+                borderRadius: 'var(--r-md)', 
+                padding: '8px 12px',
+                background: 'var(--bg-surface-2)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6
+              }}>
+                {products.map(p => {
+                  const checked = (editVoucherForm.scopeProductIds || []).includes(p.id);
+                  return (
+                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', margin: 0 }}>
+                      <input 
+                        type="checkbox" 
+                        checked={checked} 
+                        style={{ width: 'auto', cursor: 'pointer' }}
+                        onChange={() => {
+                          const currentIds = editVoucherForm.scopeProductIds || [];
+                          const nextIds = checked 
+                            ? currentIds.filter(id => id !== p.id) 
+                            : [...currentIds, p.id];
+                          setEditVoucherForm({ ...editVoucherForm, scopeProductIds: nextIds });
                         }}
                       />
                       <span>{p.name} ({fmtVnd(p.price)})</span>
