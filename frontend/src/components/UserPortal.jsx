@@ -1177,17 +1177,18 @@ export default function UserPortal({
                               <div className="product-card-body">
                                 <h3 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: 5, color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 40 }}>{prod.name}</h3>
                                 <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 34, marginBottom: 12 }}>{prod.description}</p>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <div className="product-price" style={{ fontSize: '0.85rem' }}>{fmtVnd(prod.price)}</div>
+                                <div className="product-card-footer">
+                                  <div className="product-price">{fmtVnd(prod.price)}</div>
                                   {!viewOnly ? (
-                                    <div style={{ display: 'flex', gap: 6 }}>
+                                    <div className="product-card-actions">
                                       <button 
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); handleAddToCart(prod); }} 
-                                        className="btn btn-secondary btn-sm" 
-                                        style={{ borderRadius: 'var(--r-full)', padding: '5px 10px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 3 }}
+                                        className="btn btn-secondary btn-sm btn-add-cart"
+                                        title="Thêm vào giỏ"
                                       >
-                                        <ShoppingCart size={11} /> Thêm giỏ
+                                        <ShoppingCart size={12} />
+                                        <span className="btn-text">Thêm giỏ</span>
                                       </button>
                                       <button 
                                         type="button"
@@ -1196,10 +1197,10 @@ export default function UserPortal({
                                           handleAddToCart(prod); 
                                           setActiveView('cart'); 
                                         }} 
-                                        className="btn btn-primary btn-sm" 
-                                        style={{ borderRadius: 'var(--r-full)', padding: '5px 10px', fontSize: '0.72rem', fontWeight: 700 }}
+                                        className="btn btn-primary btn-sm btn-buy-now"
                                       >
-                                        Mua ngay
+                                        <span className="btn-text-main">Mua</span>
+                                        <span className="btn-text-extra"> ngay</span>
                                       </button>
                                     </div>
                                   ) : (

@@ -434,10 +434,10 @@ export default function App() {
                 }} 
               />
               <div className="header-logo-text">
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff', lineHeight: 1.1, letterSpacing: '-.01em' }}>
+                <div className="header-logo-title">
                   ĐÔNG TRIỀU <span style={{ color: 'var(--brand-yellow)' }}>24H</span>
                 </div>
-                <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,.65)', letterSpacing: '2.5px', fontWeight: 700, textTransform: 'uppercase' }}>
+                <div className="header-logo-subtitle">
                   Điện lạnh chuyên nghiệp
                 </div>
               </div>

@@ -265,6 +265,55 @@ label { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); disp
 .product-price { font-size: 1.1rem; font-weight: 800; color: var(--danger); letter-spacing: -.02em; }
 .product-price-original { font-size: 0.78rem; color: var(--text-muted); text-decoration: line-through; margin-left: 4px; }
 
+/* Header Logo Text Styles */
+.header-logo-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+}
+.header-logo-subtitle {
+  font-size: 0.55rem;
+  color: rgba(255,255,255,.65);
+  letter-spacing: 2.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Product Card Footer Actions styling */
+.product-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.product-card-footer .product-price {
+  font-size: 0.85rem;
+}
+.product-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.btn-add-cart {
+  border-radius: var(--r-full);
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.btn-buy-now {
+  border-radius: var(--r-full);
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ═══════════════════════════════════════════════════════
    KPI CARDS
    ═══════════════════════════════════════════════════════ */
@@ -812,7 +861,7 @@ label { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); disp
     display: none !important;
   }
   .header-logo-text {
-    display: none !important;
+    display: block !important;
   }
   header > div > div {
     gap: 10px !important;
@@ -870,6 +919,52 @@ label { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); disp
   .product-card-body .btn {
     font-size: 0.72rem !important;
     padding: 4px 8px !important;
+  }
+  
+  /* Header Logo Responsive */
+  .header-logo-title {
+    font-size: 1.05rem !important;
+  }
+  .header-logo-subtitle {
+    font-size: 0.5rem !important;
+    letter-spacing: 1.5px !important;
+  }
+  
+  /* Product Actions Responsive */
+  .product-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px !important;
+  }
+  .product-card-actions {
+    display: flex;
+    gap: 4px !important;
+    align-items: center !important;
+  }
+  .btn-add-cart {
+    padding: 6px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  .btn-add-cart .btn-text {
+    display: none !important;
+  }
+  .btn-buy-now {
+    padding: 5px 8px !important;
+    height: 28px !important;
+    font-size: 0.7rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .btn-buy-now .btn-text-extra {
+    display: none !important;
   }
 }
 
