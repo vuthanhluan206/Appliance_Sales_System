@@ -391,10 +391,12 @@ export default function UserPortal({
       if (cond === 'ALL') {
         isEligible = true;
       } else if (cond.startsWith('CATEGORY:')) {
-        const catId = parseInt(cond.split(':')[1]);
-        if (p.categoryId === catId) isEligible = true;
+        const parts = cond.split(':');
+        const catId = parts[1] ? parseInt(parts[1]) : NaN;
+        if (!isNaN(catId) && p.categoryId === catId) isEligible = true;
       } else if (cond.startsWith('PRODUCT:')) {
-        const productIds = cond.split(':')[1].split(',').map(id => parseInt(id));
+        const parts = cond.split(':');
+        const productIds = parts[1] ? parts[1].split(',').map(id => parseInt(id)).filter(Boolean) : [];
         if (productIds.includes(p.id)) isEligible = true;
       }
       
@@ -1044,9 +1046,10 @@ export default function UserPortal({
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
                     {discounts.map(d => {
-                      const claimed = claimedCodes.includes(d.code.toUpperCase());
-                      const isExpired = new Date(d.endDate) < new Date();
-                      const isMaxed = d.usedCount >= d.maxUsages;
+                      const codeUpper = d.code ? d.code.toUpperCase() : '';
+                      const claimed = codeUpper ? claimedCodes.includes(codeUpper) : false;
+                      const isExpired = d.endDate ? new Date(d.endDate) < new Date() : false;
+                      const isMaxed = (d.usedCount !== undefined && d.maxUsages !== undefined) ? (d.usedCount >= d.maxUsages) : false;
                       const isInactive = d.status !== 'ACTIVE' || isExpired || isMaxed;
                       
                       let conditionText = '';
@@ -1054,12 +1057,14 @@ export default function UserPortal({
                       if (cond === 'ALL') {
                         conditionText = 'Áp dụng cho tất cả sản phẩm.';
                       } else if (cond.startsWith('CATEGORY:')) {
-                        const catId = parseInt(cond.split(':')[1]);
-                        const catName = categories.find(c => c.id === catId)?.name || 'Danh mục sản phẩm';
+                        const parts = cond.split(':');
+                        const catId = parts[1] ? parseInt(parts[1]) : NaN;
+                        const catName = !isNaN(catId) ? (categories.find(c => c.id === catId)?.name || 'Danh mục sản phẩm') : 'Danh mục sản phẩm';
                         conditionText = `Chỉ áp dụng cho các sản phẩm thuộc danh mục: ${catName}.`;
                       } else if (cond.startsWith('PRODUCT:')) {
-                        const productIds = cond.split(':')[1].split(',').map(id => parseInt(id));
-                        const productNames = products.filter(p => productIds.includes(p.id)).map(p => p.name).join(', ');
+                        const parts = cond.split(':');
+                        const productIds = parts[1] ? parts[1].split(',').map(id => parseInt(id)).filter(Boolean) : [];
+                        const productNames = productIds.length > 0 ? products.filter(p => productIds.includes(p.id)).map(p => p.name).join(', ') : '';
                         conditionText = `Chỉ áp dụng cho các sản phẩm: ${productNames || 'Sản phẩm cụ thể'}.`;
                       }
 

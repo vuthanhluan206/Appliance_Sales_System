@@ -1335,8 +1335,8 @@ export default function AdminDashboard() {
                         {d.applicableConditions && d.applicableConditions !== 'ALL' && (
                           <span style={{ color: 'var(--brand-blue)', fontWeight: 600 }}>
                             Áp dụng: {d.applicableConditions.startsWith('CATEGORY:') 
-                              ? `Danh mục: ${categories.find(c => String(c.id) === String(d.applicableConditions.split(':')[1]))?.name || '—'}`
-                              : `Sản phẩm cụ thể (${d.applicableConditions.split(':')[1].split(',').length} SP)`
+                              ? `Danh mục: ${categories.find(c => String(c.id) === String(d.applicableConditions.split(':')[1] || ''))?.name || '—'}`
+                              : `Sản phẩm cụ thể (${(d.applicableConditions.split(':')[1] || '').split(',').filter(Boolean).length} SP)`
                             }
                           </span>
                         )}
