@@ -274,9 +274,16 @@ public class DataInitializer implements CommandLineRunner {
 
     private void initializeVectorStoreData() {
         try {
-            // Check if the vector store table contains any records
-            Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM vector_store", Integer.class);
-            if (count == null || count == 0) {
+            boolean isEmpty = false;
+            try {
+                Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM vector_store", Integer.class);
+                isEmpty = (count == null || count == 0);
+            } catch (Exception e) {
+                log.info("Could not query vector_store table (it might not exist in in-memory mode): {}. Proceeding to ingest.", e.getMessage());
+                isEmpty = true;
+            }
+
+            if (isEmpty) {
                 log.info("Vector store is empty. Attempting to ingest dich_vu.txt...");
                 File file = new File("backend/data/dich_vu.txt");
                 if (!file.exists()) {
@@ -290,7 +297,7 @@ public class DataInitializer implements CommandLineRunner {
                     log.warn("Could not locate dich_vu.txt at backend/data/dich_vu.txt or data/dich_vu.txt");
                 }
             } else {
-                log.info("Vector store already initialized with {} records.", count);
+                log.info("Vector store already initialized.");
             }
         } catch (Exception e) {
             log.error("Error during vector store initialization: {}", e.getMessage(), e);
