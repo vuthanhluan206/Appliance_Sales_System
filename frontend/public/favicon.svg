@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="iceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8d8f0"/>
+      <stop offset="50%" stop-color="#4fa8d5"/>
+      <stop offset="100%" stop-color="#1565c0"/>
+    </linearGradient>
+    <!-- Define one arm of the snowflake, pointing UP from center -->
+    <g id="arm">
+      <!-- Main spine -->
+      <line x1="32" y1="32" x2="32" y2="5" stroke="url(#iceGrad)" stroke-width="2.8" stroke-linecap="round"/>
+
+      <!-- Branch pair 1 (near tip) -->
+      <line x1="32" y1="10" x2="27" y2="5"  stroke="url(#iceGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="32" y1="10" x2="37" y2="5"  stroke="url(#iceGrad)" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- Branch pair 2 (mid-upper) -->
+      <line x1="32" y1="17" x2="25" y2="10" stroke="url(#iceGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="32" y1="17" x2="39" y2="10" stroke="url(#iceGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <!-- Sub-branch on mid-upper -->
+      <line x1="26" y1="11.5" x2="23" y2="8"  stroke="url(#iceGrad)" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="38" y1="11.5" x2="41" y2="8"  stroke="url(#iceGrad)" stroke-width="1.2" stroke-linecap="round"/>
+
+      <!-- Branch pair 3 (lower-mid) -->
+      <line x1="32" y1="24" x2="24" y2="16" stroke="url(#iceGrad)" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="32" y1="24" x2="40" y2="16" stroke="url(#iceGrad)" stroke-width="1.6" stroke-linecap="round"/>
+
+      <!-- Tip diamond -->
+      <polygon points="32,4  35,7  32,10  29,7" fill="url(#iceGrad)" opacity="0.85"/>
+    </g>
+  </defs>
+
+  <!-- 6 arms rotated 60° apart -->
+  <use href="#arm" transform="rotate(0   32 32)"/>
+  <use href="#arm" transform="rotate(60  32 32)"/>
+  <use href="#arm" transform="rotate(120 32 32)"/>
+  <use href="#arm" transform="rotate(180 32 32)"/>
+  <use href="#arm" transform="rotate(240 32 32)"/>
+  <use href="#arm" transform="rotate(300 32 32)"/>
+
+  <!-- Center hexagon core -->
+  <polygon
+    points="32,27 37,29.5 37,34.5 32,37 27,34.5 27,29.5"
+    fill="url(#iceGrad)" opacity="0.9"/>
+  <circle cx="32" cy="32" r="2.5" fill="#e8f4fd"/>
+</svg>

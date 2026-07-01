@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Gốc lưu log -->
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="logs"/>
+    <springProperty scope="context" name="LOG_FILE" source="logging.file.name" defaultValue="dienlanh-app.log"/>
+
+    <!-- Appender ghi ra Console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Appender ghi ra File tự động xoay vòng và xóa sau 30 ngày -->
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- File log hiện tại -->
+        <file>${LOG_PATH}/${LOG_FILE}</file>
+        
+        <!-- Cấu hình lưu trữ và xoay vòng theo ngày -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Tên file khi archive -->
+            <fileNamePattern>${LOG_PATH}/archived/${LOG_FILE}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Giữ tối đa 30 ngày lịch sử -->
+            <maxHistory>30</maxHistory>
+            <!-- Giới hạn tổng dung lượng các file lưu trữ là 3GB, nếu quá sẽ xóa file cũ trước -->
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Cấu hình log levels cho profile 'dev' -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="ROLLING_FILE" />
+        </root>
+        <logger name="com.example.dienlanh" level="DEBUG" />
+    </springProfile>
+
+    <!-- Cấu hình log levels cho profile 'prod' -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="ROLLING_FILE" />
+        </root>
+        <logger name="com.example.dienlanh" level="INFO" />
+    </springProfile>
+</configuration>

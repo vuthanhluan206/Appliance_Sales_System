@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dienlanhdongtrieu24h.com/sitemap.xml
